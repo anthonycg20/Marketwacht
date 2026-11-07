@@ -143,43 +143,53 @@
     <!-- Carga del Widget Avanzado de TradingView -->
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script type="text/javascript">
-        let currentSymbol = "OANDA:XAUUSD";
-        let widget;
+    let currentSymbol = "OANDA:XAUUSD";
+    let widget;
 
-        function initChart(symbol) {
-            widget = new TradingView.widget({
-                "autosize": true,
-                "symbol": symbol,
-                "interval": "1",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "es",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_side_toolbar": false,
-                "allow_symbol_change": true,
-                "details": true,
-                "hotlist": true,
-                "calendar": true,
-                "container_id": "tv_chart_container"
-            });
-        }
+    function initChart(symbol) {
+        widget = new TradingView.widget({
+            "autosize": true,
+            "symbol": symbol,
+            "interval": "1",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "es",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "allow_symbol_change": true,
+            "details": true,
+            "hotlist": true,
+            "calendar": true,
+            "container_id": "tv_chart_container",
+            
+            // --- AQUÍ AGREGAS TODOS LOS INDICADORES QUE QUIERAS (SIN LÍMITE DE 3) ---
+            "studies": [
+                "MASimple@tv-basicstudies",       // Media Móvil Simple (SMA)
+                "MAExp@tv-basicstudies",          // Media Móvil Exponencial (EMA)
+                "RSI@tv-basicstudies",            // Índice de Fuerza Relativa (RSI)
+                "MACD@tv-basicstudies",           // MACD
+                "BB@tv-basicstudies",             // Bandas de Bollinger
+                "StochasticRSI@tv-basicstudies"   // RSI Estocástico
+            ]
+        });
+    }
 
-        function changeSymbol(newSymbol) {
-            currentSymbol = newSymbol;
-            initChart(newSymbol);
-        }
+    function changeSymbol(newSymbol) {
+        currentSymbol = newSymbol;
+        initChart(newSymbol);
+    }
 
-        function closeRow(btn) {
-            const row = btn.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-        }
+    function closeRow(btn) {
+        const row = btn.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
 
-        // Inicializar gráfico por defecto al cargar la página
-        window.onload = function() {
-            initChart(currentSymbol);
-        };
-    </script>
+    window.onload = function() {
+        initChart(currentSymbol);
+    };
+</script>
+
 </body>
 </html>
