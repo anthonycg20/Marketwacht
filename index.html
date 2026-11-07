@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Trading - Vantage Clone</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #131722; color: #d1d4dc; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Ticker Superior */
+        .ticker-container { height: 45px; background: #1e222d; border-bottom: 1px solid #2a2e39; }
+        
+        /* Layout Principal */
+        .main-layout { display: flex; flex: 1; height: calc(100vh - 225px); }
+        
+        /* Sidebar de Mercado */
+        .sidebar { width: 280px; background: #1e222d; border-right: 1px solid #2a2e39; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 12px; font-weight: bold; font-size: 14px; border-bottom: 1px solid #2a2e39; color: #fff; }
+        .watchlist-item { display: flex; justify-content: space-between; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #262b3e; font-size: 13px; }
+        .watchlist-item:hover { background: #2a2e39; }
+        .green { color: #089981; }
+        .red { color: #f23645; }
+        
+        /* Area del Gráfico */
+        .chart-container { flex: 1; position: relative; }
+        
+        /* Tabla de Posiciones Inferior */
+        .positions-container { height: 180px; background: #1e222d; border-top: 1px solid #2a2e39; padding: 10px; overflow-y: auto; }
+        .positions-header { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #848e9c; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #2a2e39; }
+        th { color: #848e9c; font-weight: normal; }
+        .btn-close { background: #2962ff; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; }
+        .btn-close:hover { background: #1e53e5; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Ticker Bar Superior -->
+    <div class="ticker-container">
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+            {
+            "symbols": [
+                {"proName": "OANDA:XAUUSD", "title": "XAUUSD"},
+                {"proName": "FX_IDC:EURUSD", "title": "EURUSD"},
+                {"proName": "FX_IDC:GBPUSD", "title": "GBPUSD"},
+                {"proName": "FOREXCOM:SPX500USD", "title": "S&P 500"},
+                {"proName": "FOREXCOM:NSXUSD", "title": "NAS100"},
+                {"proName": "NASDAQ:AAPL", "title": "AAPL"},
+                {"proName": "NASDAQ:TSLA", "title": "TSLA"}
+            ],
+            "showSymbolLogo": true,
+            "colorTheme": "dark",
+            "isTransparent": true,
+            "displayMode": "adaptive",
+            "locale": "es"
+            }
+            </script>
+        </div>
+    </div>
+
+    <!-- 2. Cuerpo Principal (Sidebar + Gráfico) -->
+    <div class="main-layout">
+        <!-- Watchlist Lateral -->
+        <div class="sidebar">
+            <div class="sidebar-header">Watchlist / Instrumentos</div>
+            <div class="watchlist-item" onclick="changeSymbol('OANDA:XAUUSD')">
+                <span><b>XAUUSD</b><br><small style="color:#848e9c;">Oro / USD</small></span>
+                <span class="green">3,927.56<br><small>+1.26%</small></span>
+            </div>
+            <div class="watchlist-item" onclick="changeSymbol('FX_IDC:AUDUSD')">
+                <span><b>AUDUSD</b><br><small style="color:#848e9c;">Dólar Aus.</small></span>
+                <span class="green">0.66107<br><small>+0.15%</small></span>
+            </div>
+            <div class="watchlist-item" onclick="changeSymbol('FOREXCOM:NSXUSD')">
+                <span><b>NAS100</b><br><small style="color:#848e9c;">Nasdaq 100</small></span>
+                <span class="green">24,923.70<br><small>+0.53%</small></span>
+            </div>
+            <div class="watchlist-item" onclick="changeSymbol('FX_IDC:EURUSD')">
+                <span><b>EURUSD</b><br><small style="color:#848e9c;">Euro / Dólar</small></span>
+                <span class="red">1.17015<br><small>-0.33%</small></span>
+            </div>
+            <div class="watchlist-item" onclick="changeSymbol('FX_IDC:GBPUSD')">
+                <span><b>GBPUSD</b><br><small style="color:#848e9c;">Libra / Dólar</small></span>
+                <span class="red">1.34494<br><small>-0.21%</small></span>
+            </div>
+        </div>
+
+        <!-- Contenedor del Gráfico Interactivo TradingView -->
+        <div class="chart-container" id="tv_chart_container"></div>
+    </div>
+
+    <!-- 3. Tabla de Posiciones Simulas (Inferior) -->
+    <div class="positions-container">
+        <div class="positions-header">Posiciones Abiertas (Simulación)</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Símbolo</th>
+                    <th>Tipo</th>
+                    <th>Vol (Lotes)</th>
+                    <th>Precio Entrada</th>
+                    <th>Precio Actual</th>
+                    <th>PnL ($)</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="positions-body">
+                <tr>
+                    <td><b>AUDUSD</b></td>
+                    <td class="red">SELL</td>
+                    <td>0.02</td>
+                    <td>0.66121</td>
+                    <td>0.66121</td>
+                    <td class="red">-0.15</td>
+                    <td><button class="btn-close" onclick="closeRow(this)">Cerrar</button></td>
+                </tr>
+                <tr>
+                    <td><b>XAUUSD</b></td>
+                    <td class="green">BUY</td>
+                    <td>0.01</td>
+                    <td>3,931.34</td>
+                    <td>3,932.08</td>
+                    <td class="green">+0.74</td>
+                    <td><button class="btn-close" onclick="closeRow(this)">Cerrar</button></td>
+                </tr>
+                <tr>
+                    <td><b>XAUUSD</b></td>
+                    <td class="green">BUY</td>
+                    <td>0.10</td>
+                    <td>3,931.15</td>
+                    <td>3,932.08</td>
+                    <td class="green">+9.30</td>
+                    <td><button class="btn-close" onclick="closeRow(this)">Cerrar</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Carga del Widget Avanzado de TradingView -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+        let currentSymbol = "OANDA:XAUUSD";
+        let widget;
+
+        function initChart(symbol) {
+            widget = new TradingView.widget({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "1",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "es",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "details": true,
+                "hotlist": true,
+                "calendar": true,
+                "container_id": "tv_chart_container"
+            });
+        }
+
+        function changeSymbol(newSymbol) {
+            currentSymbol = newSymbol;
+            initChart(newSymbol);
+        }
+
+        function closeRow(btn) {
+            const row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        // Inicializar gráfico por defecto al cargar la página
+        window.onload = function() {
+            initChart(currentSymbol);
+        };
+    </script>
+</body>
+</html>
